@@ -6,48 +6,66 @@ interface Product {
   description: string;
 }
 
-export default async function ProductsPage() {
-  const response = await fetch("https://fakestoreapi.com/products");
-  const products: Product[] = await response.json();
+export const dynamic = "force-dynamic";
+
+export default async function Page() {
+  let products: Product[] = [];
+
+  try {
+    const response = await fetch("https://fakestoreapi.com/products", {
+      cache: "no-store",
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP Error: ${response.status}`);
+    }
+
+    products = await response.json();
+  } catch (error) {
+    console.error("Gagal mengambil data:", error);
+
+    return (
+      <main className="p-8">
+        <h1 className="text-3xl font-bold mb-4">Daftar Produk</h1>
+        <p className="text-red-500">Gagal mengambil data dari API.</p>
+      </main>
+    );
+  }
 
   return (
-    <div>
+    <main className="p-8">
       <h1 className="text-3xl font-bold mb-6">Daftar Produk</h1>
 
-      <div className="flex flex-wrap gap-4">
+      <div className="flex flex-wrap gap-6">
         {products.map((product) => (
           <div
             key={product.id}
-            className="relative flex flex-col text-gray-700 bg-white shadow-md rounded-xl w-96"
+            className="w-80 rounded-xl shadow-md border bg-white overflow-hidden"
           >
-            <div className="relative mx-4 mt-4 overflow-hidden rounded-xl h-96">
-              <img
-                src={product.image}
-                alt={product.title}
-                className="object-cover w-full h-full"
-              />
-            </div>
+            <img
+              src={product.image}
+              alt={product.title}
+              className="w-full h-64 object-contain p-4"
+            />
 
-            <div className="p-6">
-              <div className="flex items-center justify-between mb-2">
-                <p className="font-medium">{product.title}</p>
-                <p className="font-medium">${product.price.toFixed(2)}</p>
-              </div>
+            <div className="p-4">
+              <h2 className="font-bold text-lg mb-2">{product.title}</h2>
 
-              <p className="text-sm text-gray-600">{product.description}</p>
-            </div>
+              <p className="text-green-600 font-semibold mb-2">
+                ${product.price.toFixed(2)}
+              </p>
 
-            <div className="p-6 pt-0">
-              <button
-                type="button"
-                className="w-full bg-blue-500 text-white py-3 rounded-lg hover:bg-blue-600 transition"
-              >
+              <p className="text-sm text-gray-600 line-clamp-3">
+                {product.description}
+              </p>
+
+              <button className="mt-4 w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 transition">
                 Add to Cart
               </button>
             </div>
           </div>
         ))}
       </div>
-    </div>
+    </main>
   );
 }
